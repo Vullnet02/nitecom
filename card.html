@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build the Sentence Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #ffeb3b, #4caf50);
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #target-text {
+      font-size: 1.5rem;
+      color: #333;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 90%;
+    }
+
+    #card-pool, #drop-zone {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 20px;
+      min-height: 120px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    .card {
+      width: 100px;
+      height: 120px;
+      background: linear-gradient(45deg, #ff6f61, #ffb347);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: grab;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      padding: 8px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 5px;
+    }
+
+    .card.dragging {
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1.2rem;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    #check-btn {
+      background-color: #4caf50;
+    }
+
+    #next-btn {
+      background-color: #2196f3;
+      display: none;
+    }
+
+    #retry-btn {
+      background-color: #ff9800;
+      display: none;
+    }
+
+    #result {
+      font-size: 1.3rem;
+      text-align: center;
+      margin-top: 15px;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    #score {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      #target-text {
+        font-size: 1.1rem;
+      }
+
+      .card {
+        width: 80px;
+        height: 100px;
+        font-size: 0.9rem;
+      }
+
+      .card img {
+        width: 40px;
+        height: 40px;
+      }
+
+      button {
+        padding: 10px 15px;
+        font-size: 1rem;
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .correct {
+      animation: bounce 0.3s ease 2;
+    }
+  </style>
+</head>
+<body>
+  <h2>Build the Sentence Game</h2>
+  <div id="score">Score: <span id="score-value">0</span></div>
+  <div id="target-text"></div>
+
+  <div><strong>Word Cards:</strong></div>
+  <div id="card-pool"></div>
+
+  <div><strong>Place Cards Here:</strong></div>
+  <div id="drop-zone"></div>
+
+  <div style="text-align: center;">
+    <button id="check-btn">Check</button>
+    <button id="retry-btn">Try Again</button>
+    <button id="next-btn">Next</button>
+  </div>
+
+  <div id="result"></div>
+
+  <audio id="correct-sound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
+  <audio id="wrong-sound" src="https://www.soundjay.com/buttons/beep-02.mp3"></audio>
+  <audio id="drop-sound" src="https://www.soundjay.com/buttons/beep-07.mp3"></audio>
+
+  <script>
+    const sentences = [
+      {
+        full: "I love to play soccer",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "love", img: "https://img.icons8.com/color/60/000000/hearts.png" },
+          { text: "to play", img: "https://img.icons8.com/color/60/000000/sports.png" },
+          { text: "soccer", img: "https://img.icons8.com/color/60/000000/soccer-ball.png" }
+        ]
+      },
+      {
+        full: "The cat is on the mat",
+        cards: [
+          { text: "The cat", img: "https://img.icons8.com/color/60/000000/cat.png" },
+          { text: "is", img: "https://img.icons8.com/color/60/000000/equal-sign.png" },
+          { text: "on", img: "https://img.icons8.com/color/60/000000/up.png" },
+          { text: "the mat", img: "https://img.icons8.com/color/60/000000/rug.png" }
+        ]
+      },
+      {
+        full: "I eat a big apple",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "eat", img: "https://img.icons8.com/color/60/000000/food.png" },
+          { text: "a big", img: "https://img.icons8.com/color/60/000000/full.png" },
+          { text: "apple", img: "https://img.icons8.com/color/60/000000/apple.png" }
+        ]
+      },
+      {
+        full: "My dog runs fast",
+        cards: [
+          { text: "My dog", img: "https://img.icons8.com/color/60/000000/dog.png" },
+          { text: "runs", img: "https://img.icons8.com/color/60/000000/running.png" },
+          { text: "fast", img: "https://img.icons8.com/color/60/000000/speed.png" }
+        ]
+      },
+      {
+        full: "The sun is shining",
+        cards: [
+          { text: "The sun", img: "https://img.icons8.com/color/60/000000/sun.png" },
+          { text: "is", img: "https://img.icons8.com/color/60/000000/equal-sign.png" },
+          { text: "shining", img: "https://img.icons8.com/color/60/000000/sparkling.png" }
+        ]
+      },
+      {
+        full: "I draw a happy face",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "draw", img: "https://img.icons8.com/color/60/000000/pencil.png" },
+          { text: "a happy", img: "https://img.icons8.com/color/60/000000/happy.png" },
+          { text: "face", img: "https://img.icons8.com/color/60/000000/smiling.png" }
+        ]
+      },
+      {
+        full: "The bird sings loudly",
+        cards: [
+          { text: "The bird", img: "https://img.icons8.com/color/60/000000/bird.png" },
+          { text: "sings", img: "https://img.icons8.com/color/60/000000/musical-notes.png" },
+          { text: "loudly", img: "https://img.icons8.com/color/60/000000/high-volume.png" }
+        ]
+      },
+      {
+        full: "I ride my bike",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "ride", img: "https://img.icons8.com/color/60/000000/cycling.png" },
+          { text: "my bike", img: "https://img.icons8.com/color/60/000000/bicycle.png" }
+        ]
+      },
+      {
+        full: "The fish swims in water",
+        cards: [
+          { text: "The fish", img: "https://img.icons8.com/color/60/000000/fish.png" },
+          { text: "swims", img: "https://img.icons8.com/color/60/000000/swimming.png" },
+          { text: "in water", img: "https://img.icons8.com/color/60/000000/water.png" }
+        ]
+      },
+      {
+        full: "I read a fun book",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "read", img: "https://img.icons8.com/color/60/000000/book.png" },
+          { text: "a fun", img: "https://img.icons8.com/color/60/000000/party.png" },
+          { text: "book", img: "https://img.icons8.com/color/60/000000/book.png" }
+        ]
+      },
+      {
+        full: "The car is very fast",
+        cards: [
+          { text: "The car", img: "https://img.icons8.com/color/60/000000/car.png" },
+          { text: "is", img: "https://img.icons8.com/color/60/000000/equal-sign.png" },
+          { text: "very fast", img: "https://img.icons8.com/color/60/000000/speed.png" }
+        ]
+      },
+      {
+        full: "I jump high",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "jump", img: "https://img.icons8.com/color/60/000000/jump.png" },
+          { text: "high", img: "https://img.icons8.com/color/60/000000/up.png" }
+        ]
+      },
+      {
+        full: "The tree is tall",
+        cards: [
+          { text: "The tree", img: "https://img.icons8.com/color/60/000000/tree.png" },
+          { text: "is", img: "https://img.icons8.com/color/60/000000/equal-sign.png" },
+          { text: "tall", img: "https://img.icons8.com/color/60/000000/ruler.png" }
+        ]
+      },
+      {
+        full: "I like to sing songs",
+        cards: [
+          { text: "I", img: "https://img.icons8.com/color/60/000000/person-male.png" },
+          { text: "like", img: "https://img.icons8.com/color/60/000000/hearts.png" },
+          { text: "to sing", img: "https://img.icons8.com/color/60/000000/musical-notes.png" },
+          { text: "songs", img: "https://img.icons8.com/color/60/000000/music.png" }
+        ]
+      },
+      {
+        full: "The moon is bright",
+        cards: [
+          { text: "The moon", img: "https://img.icons8.com/color/60/000000/moon.png" },
+          { text: "is", img: "https://img.icons8.com/color/60/000000/equal-sign.png" },
+          { text: "bright", img: "https://img.icons8.com/color/60/000000/light.png" }
+        ]
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let attempts = 0;
+
+    const targetText = document.getElementById("target-text");
+    const cardPool = document.getElementById("card-pool");
+    const dropZone = document.getElementById("drop-zone");
+    const result = document.getElementById("result");
+    const checkBtn = document.getElementById("check-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const retryBtn = document.getElementById("retry-btn");
+    const scoreValue = document.getElementById("score-value");
+    const correctSound = document.getElementById("correct-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+    const dropSound = document.getElementById("drop-sound");
+
+    function shuffle(arr) {
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function render() {
+      result.innerText = "";
+      checkBtn.style.display = "inline-block";
+      nextBtn.style.display = "none";
+      retryBtn.style.display = "none";
+      dropZone.innerHTML = "";
+      cardPool.innerHTML = "";
+      attempts = 0;
+
+      const sentence = sentences[current];
+      targetText.innerText = `Build this sentence: "${sentence.full}"`;
+
+      shuffle(sentence.cards).forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.draggable = true;
+        card.dataset.word = item.text;
+        card.innerHTML = `<img src="${item.img}" alt="${item.text}"><div>${item.text}</div>`;
+        cardPool.appendChild(card);
+
+        card.addEventListener("dragstart", (e) => {
+          card.classList.add("dragging");
+          e.dataTransfer.setData("text/plain", item.text);
+        });
+
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+        });
+      });
+    }
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const word = e.dataTransfer.getData("text/plain");
+      const draggedCard = [...cardPool.children].find(c => c.dataset.word === word);
+      if (draggedCard) {
+        const clone = draggedCard.cloneNode(true);
+        clone.draggable = false;
+        dropZone.appendChild(clone);
+        cardPool.removeChild(draggedCard);
+        dropSound.play();
+      }
+    });
+
+    checkBtn.addEventListener("click", () => {
+      const sentence = sentences[current];
+      const droppedWords = [...dropZone.children].map(el => el.dataset.word);
+      const expectedWords = sentence.cards.map(c => c.text);
+
+      if (droppedWords.join(" ") === expectedWords.join(" ")) {
+        result.innerHTML = "🎉 Great job!";
+        result.classList.add("correct");
+        score += 10;
+        scoreValue.innerText = score;
+        correctSound.play();
+        checkBtn.style.display = "none";
+        nextBtn.style.display = "inline-block";
+        retryBtn.style.display = "none";
+        attempts = 0;
+      } else {
+        attempts++;
+        if (attempts >= 2) {
+          result.innerHTML = "😔 Let's move to the next sentence!";
+          wrongSound.play();
+          checkBtn.style.display = "none";
+          nextBtn.style.display = "inline-block";
+          retryBtn.style.display = "none";
+        } else {
+          result.innerHTML = `😔 Oops, try again! (${2 - attempts} attempt${2 - attempts === 1 ? '' : 's'} left)`;
+          wrongSound.play();
+          checkBtn.style.display = "inline-block";
+          nextBtn.style.display = "none";
+          retryBtn.style.display = "inline-block";
+        }
+      }
+    });
+
+    retryBtn.addEventListener("click", () => {
+      render();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      current++;
+      if (current >= sentences.length) {
+        targetText.innerText = `🎉 Awesome! You finished all sentences with a score of ${score}!`;
+        cardPool.innerHTML = "";
+        dropZone.innerHTML = "";
+        checkBtn.style.display = "none";
+        nextBtn.style.display = "none";
+        retryBtn.style.display = "none";
+        result.innerText = "";
+      } else {
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

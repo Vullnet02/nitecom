@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
+  <title>Matematika e Minionit</title>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      text-align: center;
+      background-color: #f4c61f;
+      margin: 0;
+      padding: 10px;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 1.8em;
+    }
+
+    #mode-select {
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    #question {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ff3333;
+      font-weight: bold;
+    }
+
+    .answers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .answers button {
+      flex: 1 1 40%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 12px;
+      border: 1px solid;
+      background-color: #fff34f;
+      min-width: 100px;
+    }
+
+    #message {
+      font-size: 18px;
+      margin-top: 15px;
+      color: green;
+    }
+
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      gap: 10px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .puzzle-piece {
+      width: 70px;
+      height: 70px;
+      background-color: white;
+      border: 2px dashed #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .puzzle-piece img {
+      width: 100%;
+      height: 100%;
+    }
+
+    button {
+      background: #fbca1f;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: 16px;
+      border: 2px solid black;
+      border-radius: 0.4em;
+      box-shadow: 0.1em 0.1em;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: translate(-0.05em, -0.05em);
+      box-shadow: 0.15em 0.15em;
+    }
+
+    button:active {
+      transform: translate(0.05em, 0.05em);
+      box-shadow: 0.05em 0.05em;
+    }
+    
+  a {
+      text-decoration: none;
+      color: black;
+    }
+    #final-image {
+      display: none;
+      margin: 20px auto;
+      animation: grow 2s forwards;
+      max-width: 100%;
+      height: auto;
+    }
+
+    @keyframes grow {
+      from {
+        transform: scale(0.1);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    #endMessage {
+      display: none;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 480px) {
+      #question {
+        font-size: 20px;
+      }
+      .answers button {
+        font-size: 16px;
+      }
+      #message {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button> <a href="index.html">Menu</a></button>
+  <h1>Matematika e ndërton Minionin</h1>
+
+  <div id="mode-select">
+    <button onclick="startGame('+')">Mbledhje +</button>
+    <button onclick="startGame('-')">Zbritje -</button>
+    <button onclick="startGame('*')">Shumëzim ×</button>
+    <button onclick="startGame('/')">Pjestim ÷</button>
+  </div>
+
+  <div id="question"></div>
+  <div id="timer"></div>
+  <div class="answers" id="answers"></div>
+  <div id="message"></div>
+  <div id="puzzle"></div>
+
+  <img id="final-image" src="https://www.mecabricks.com/image/b82x1PYpj1z.png" alt="Lodra e plotë">
+
+  <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-4.mp3" preload="auto"></audio>
+  <audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3" preload="auto"></audio>
+
+  <div id="endMessage">
+    <h2>🎉 Loja përfundoi!</h2>
+    <button onclick="restartGame()">🔁 Fillo përsëri</button>
+  </div>
+
+  <script>
+    let currentQuestion = 0;
+    let collectedPieces = 0;
+    let gameStartTime;
+    let timerInterval;
+    let mode = '+';
+    let canClick = true;
+
+    const questionEl = document.getElementById('question');
+    const answersEl = document.getElementById('answers');
+    const puzzleEl = document.getElementById('puzzle');
+    const messageEl = document.getElementById('message');
+    const finalImage = document.getElementById('final-image');
+    const timerEl = document.getElementById('timer');
+    const correctSound = document.getElementById('correct-sound');
+    const wrongSound = document.getElementById('wrong-sound');
+
+    function generatePuzzleBoard() {
+      puzzleEl.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const piece = document.createElement('div');
+        piece.classList.add('puzzle-piece');
+        puzzleEl.appendChild(piece);
+      }
+    }
+
+    function startGame(selectedMode) {
+      mode = selectedMode;
+      currentQuestion = 0;
+      collectedPieces = 0;
+      finalImage.style.display = 'none';
+      timerEl.style.display = 'block';
+      document.getElementById('endMessage').style.display = 'none';
+      generatePuzzleBoard();
+      startGameTimer();
+      loadQuestion();
+    }
+
+    function restartGame() {
+      messageEl.innerText = '';
+      questionEl.innerText = '';
+      answersEl.innerHTML = '';
+      finalImage.style.display = 'none';
+      document.getElementById('endMessage').style.display = 'none';
+      startGame(mode);
+    }
+
+    function startGameTimer() {
+      gameStartTime = Date.now();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const elapsed = (Date.now() - gameStartTime);
+        const totalSeconds = elapsed / 1000;
+        const minutes = Math.min(Math.floor(totalSeconds / 60), 59);
+        const seconds = Math.floor(totalSeconds % 60);
+        const tenths = Math.floor((totalSeconds % 1) * 10);
+        timerEl.innerText = `Koha: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
+      }, 100);
+    }
+
+    function stopGameTimer() {
+      clearInterval(timerInterval);
+      const elapsed = (Date.now() - gameStartTime);
+      const totalSeconds = elapsed / 1000;
+      const minutes = Math.min(Math.floor(totalSeconds / 60), 59);
+      const seconds = Math.floor(totalSeconds % 60);
+      const tenths = Math.floor((totalSeconds % 1) * 10);
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
+    }
+
+    function generateQuestion() {
+      let a = Math.floor(Math.random() * 55) + 1;
+      let b = Math.floor(Math.random() * 55) + 1;
+
+      if (mode === '-') {
+        if (a < b) [a, b] = [b, a];
+        return { q: `${a} - ${b}`, correct: a - b };
+      } else if (mode === '*') {
+        return { q: `${a} × ${b}`, correct: a * b };
+      } else if (mode === '/') {
+        let product = a * b;
+        return { q: `${product} ÷ ${a}`, correct: b };
+      } else {
+        return { q: `${a} + ${b}`, correct: a + b };
+      }
+    }
+
+    function loadQuestion() {
+      if (currentQuestion >= 10) {
+        const finalTime = stopGameTimer();
+        messageEl.innerHTML = `Koha jote: <strong>${finalTime}</strong>`;
+        finalImage.style.display = 'block';
+        timerEl.style.display = 'none';
+        document.getElementById('endMessage').style.display = 'block';
+        return;
+      }
+
+      const q = generateQuestion();
+      questionEl.innerText = q.q;
+
+      let options = [q.correct];
+      while (options.length < 3) {
+        let fake = q.correct + Math.floor(Math.random() * 21) - 10;
+        if (fake >= 0 && !options.includes(fake)) options.push(fake);
+      }
+      options = options.sort(() => Math.random() - 0.5);
+
+      answersEl.innerHTML = '';
+      canClick = true;
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.onclick = () => {
+          if (!canClick) return;
+          canClick = false;
+          handleAnswer(opt, q.correct);
+        };
+        answersEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(answer, correct) {
+      const piece = puzzleEl.children[currentQuestion];
+      if (answer === correct) {
+        messageEl.innerText = "Saktë!";
+        correctSound.play();
+        addPuzzlePiece(currentQuestion);
+        collectedPieces++;
+      } else {
+        messageEl.innerText = "Gabim!";
+        wrongSound.play();
+        const wrong = document.createElement('div');
+        wrong.innerText = correct;
+        wrong.style.color = 'red';
+        wrong.style.fontSize = '20px';
+        wrong.style.fontWeight = 'bold';
+        piece.appendChild(wrong);
+      }
+
+      currentQuestion++;
+      setTimeout(() => {
+        messageEl.innerText = '';
+        loadQuestion();
+      }, 1200);
+    }
+
+    function addPuzzlePiece(index) {
+      const piece = puzzleEl.children[index];
+      const img = document.createElement('img');
+      img.src = `https://via.placeholder.com/70x70?text=${index + 1}`;
+      piece.appendChild(img);
+      piece.style.transform = 'scale(1.1)';
+      setTimeout(() => piece.style.transform = 'scale(1)', 500);
+    }
+  </script>
+</body>
+</html>

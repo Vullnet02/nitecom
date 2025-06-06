@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loja me Voice + Card</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .card-container, .drop-zone {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    .card {
+      background: #e0e7ff;
+      border: 1px solid #a5b4fc;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px;
+      width: 100px;
+      cursor: grab;
+      user-select: none;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    #result, #try-again-btn {
+      margin-top: 15px;
+    }
+    button {
+      background-color: #10b981;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    button:hover {
+      background-color: #0f766e;
+    }
+    @media (max-width: 600px) {
+      .card {
+        width: 80px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>🎤 Loja: Fol dhe Rendit Frazën</h2>
+  <div id="voice-instruction">Thuaj këtë frazë: "I want to learn English"</div>
+  <button onclick="startListening()">🎙️ Aktivizo Mikrofonin</button>
+  <div id="speech-result" style="margin-top:10px; font-style:italic;"></div>
+
+  <div id="phrase-zone" class="hidden">
+    <p>Rendit kartat për frazën: <strong>"I want to learn English"</strong></p>
+    <div id="card-pool" class="card-container"></div>
+    <div style="margin-top:10px;">Rendit kartat këtu:</div>
+    <div id="drop-zone" class="card-container drop-zone"></div>
+    <button onclick="checkResult()">Kontrollo</button>
+    <div id="result" style="font-weight:bold;"></div>
+    <button id="try-again-btn" class="hidden" onclick="resetDropZone()">Provo Përsëri</button>
+  </div>
+
+  <script>
+    const expectedPhrase = "i want to learn english";
+    const cards = ["I", "want", "to", "learn", "English"];
+    let recognizedText = "";
+
+    // Një funksion për të përzier një array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // Krijon kartat në "card-pool" me ID unik dhe draggable=true
+    function makeCards() {
+      const cardPool = document.getElementById("card-pool");
+      cardPool.innerHTML = ""; // Fshij të gjitha që ndodhën më parë
+      const shuffled = shuffle([...cards]); // kopjoj dhe përziej
+      shuffled.forEach((text, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.draggable = true;
+        card.textContent = text;
+        // i japim një ID unike: p.sh. "card-0", "card-1", etj.
+        card.id = `card-${index}-${text.toLowerCase().replace(/\s+/g, "")}`;
+        // Kur fillon dragu, ruajmë në dataTransfer edhe ID-në e kartës
+        card.ondragstart = (e) => {
+          e.dataTransfer.setData("text/plain", text);
+          e.dataTransfer.setData("source-id", card.id);
+        };
+        cardPool.appendChild(card);
+      });
+    }
+
+    // Sillja e Drop Zone: duhet t'i lejojë kartat të “move”-ohen aty
+    const dropZone = document.getElementById("drop-zone");
+    dropZone.ondragover = (e) => e.preventDefault(); // lejon drop-in
+    dropZone.ondrop = (e) => {
+      e.preventDefault();
+      const text = e.dataTransfer.getData("text/plain");
+      const sourceId = e.dataTransfer.getData("source-id");
+      const sourceCard = document.getElementById(sourceId);
+
+      // Kontrolloj mos është futur njësoj dy herë
+      const alreadyInDrop = Array.from(dropZone.children)
+        .some(c => c.textContent.toLowerCase() === text.toLowerCase());
+
+      if (sourceCard && !alreadyInDrop) {
+        dropZone.appendChild(sourceCard);
+        // opsionale: të ndryshosh cursor-in kur është vendosur
+        sourceCard.style.cursor = "grab";
+      }
+    };
+
+    // Kontrollon nëse renditja korrespondon me frazën e pritur
+    function checkResult() {
+      const resultArr = Array.from(dropZone.children)
+        .map((el) => el.textContent.toLowerCase())
+        .join(" ");
+      const output = document.getElementById("result");
+      if (resultArr === expectedPhrase) {
+        output.textContent = "✅ Saktë! Bravo, e ke renditur si duhet!";
+        output.style.color = "green";
+        document.getElementById("try-again-btn").classList.add("hidden");
+      } else {
+        output.textContent = "❌ Gabim. Provo përsëri!";
+        output.style.color = "red";
+        document.getElementById("try-again-btn").classList.remove("hidden");
+      }
+    }
+
+    // Funksioni për të kthyer kartat në pool dhe për të fshirë mesazhet
+    function resetDropZone() {
+      dropZone.innerHTML = "";
+      document.getElementById("result").textContent = "";
+      makeCards(); // Krijoj kartat prapë të përziera
+    }
+
+    // API-ja e Voice Recognition
+    function startListening() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        recognizedText = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("speech-result").textContent = `E dëgjuar: "${recognizedText}"`;
+
+        if (recognizedText.includes(expectedPhrase)) {
+          document.getElementById("phrase-zone").classList.remove("hidden");
+          makeCards();
+        } else {
+          document.getElementById("speech-result").textContent += " ❌ Nuk është saktë, provoje përsëri!";
+        }
+      };
+
+      recognition.onerror = (event) => {
+        document.getElementById("speech-result").textContent = `Gabim: ${event.error}`;
+      };
+    }
+  </script>
+</body>
+</html>

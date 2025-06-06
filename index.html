@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
+  <title>KidoBot - Home</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f4c61f;
+      overflow: scroll;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 10px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-item {
+      color: white;
+      text-decoration: none;
+      font-size: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item span {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .nav-item:hover {
+      transform: scale(1.1);
+      color: #ffcc00;
+    }
+
+    .slogan {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-top: 100px; /* Added margin to push content below fixed navbar */
+    }
+
+    .line {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #555;
+      background-color: #555;
+    }
+
+    .our-game {
+      width: 200px;
+      margin: 5px auto;
+      text-align: center;
+    }
+
+    /* Game Cards */
+    .game-cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .game-card {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 22%;
+      min-width: 200px;
+      text-align: center;
+      padding: 20px 10px;
+      position: relative;
+      transition: transform 0.3s;
+      display: flex; /* Use flexbox for vertical alignment */
+      flex-direction: column; /* Stack items vertically */
+      align-items: center; /* Center items horizontally */
+    }
+.game-card img{
+  border: 1px solid red;
+  width: 100%;
+  height: auto;
+}
+    .game-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .game-icon {
+      width: 80px; /* Increased image width */
+      height: 70px; /* Increased image height */
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .game-card h3 {
+      font-size: 18px;
+      margin: 10px 0 5px 0; /* Adjusted margin to move text closer to image */
+      color: #333;
+    }
+
+    .game-card p { /* Added a new style for the text below the image */
+        font-size: 14px;
+        color: #666;
+        margin-top: 0;
+    }
+
+    .game-type-icon {
+      font-size: 24px;
+      margin-top: 5px;
+    }
+
+    /* Footer */
+    .site-footer {
+      background-color: #222;
+      color: #fff;
+      padding: 30px 20px;
+      font-size: 14px;
+      margin-top: 40px; /* Add some space above the footer */
+    }
+
+    .footer-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .footer-logo {
+      width: 100px;
+      margin-bottom: 10px;
+    }
+
+    .footer-location {
+      font-size: 14px;
+    }
+
+    .footer-instagram {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .footer-instagram img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .footer-link {
+      color: #ccc;
+      text-decoration: none;
+      margin-bottom: 5px;
+    }
+
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer-text {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .game-card {
+        width: 45%;
+      }
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .game-card {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="kube.html" class="nav-item">
+      🎮<span>Game</span>
+    </a>
+    <a href="vid.html" class="nav-item">
+      🎥<span>Video</span>
+    </a>
+    <a href="#product" class="nav-item">
+      🛒<span>Lodrat</span>
+    </a>
+  </nav>
+
+  <div class="slogan">Jo thjesht lojëra – Një botë për të mësuar!</div>
+
+  <div class="our-game"><h1>Lojrat Tona</h1></div>
+  <div class="game-cards">
+    <a href="ai.html">
+    <div class="game-card">
+      <img src="https://media.discordapp.net/attachments/1154044874174255195/1379722549230960690/4.png?ex=68414641&is=683ff4c1&hm=dd177ee5fa004ca39a10ea67c22440468f6e43c724ac7e7d159665c231abd724&=&format=webp&quality=lossless&width=839&height=839" alt="AI Game Icon" class="game-icon">
+      <h3>Loja AI</h3>
+      <p>Përparoni inteligjencën tuaj me lojërat tona të AI.</p>
+      <div class="game-type-icon">🧠</div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="pac.html">
+      <img src="https://media.discordapp.net/attachments/1154044874174255195/1379722809034670080/2.png?ex=6841467f&is=683ff4ff&hm=77fe3436c19d15e2458ea1fbd880e87382608b50d2339e292794a38247a8df04&=&format=webp&quality=lossless&width=839&height=839" alt="History Game Icon" class="game-icon">
+      <h3>Loja Histori</h3>
+      <p>Mësoni për të kaluarën me lojëra argëtuese të historisë.</p>
+      <div class="game-type-icon">📜</div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="mat.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center;">
+        <img src="https://media.discordapp.net/attachments/1154044874174255195/1379722858250371202/3.png?ex=6841468b&is=683ff50b&hm=711808dbd944431c426ad5015e01af8d30ad2c44da06e7217caa1b09103874d7&=&format=webp&quality=lossless&width=839&height=839" alt="Math Game Icon" class="game-icon">
+        <h3>Loja Math</h3>
+        <p>Sfidojeni veten me lojëra emocionuese matematikore.</p>
+        <div class="game-type-icon">➕</div>
+      </a>
+    </div>
+
+    <div class="game-card">
+      <a href="alpa.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center;">
+        <img src="https://media.discordapp.net/attachments/1154044874174255195/1379722899501617325/1.png?ex=68414695&is=683ff515&hm=e0a234ba645de2aa6914053534f752caddd92885ce60476b0261570018cf86cf&=&format=webp&quality=lossless&width=839&height=839" alt="Alphabet Game Icon" class="game-icon">
+        <h3>Loja Alfabet</h3>
+        <p>Mësoni alfabetin në një mënyrë argëtuese dhe interaktive.</p>
+        <div class="game-type-icon">🔤</div>
+      </a>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <img src="img/logo.png" alt="Logo" class="footer-logo">
+        <p class="footer-location">📍 Prishtinë, Kosovë</p>
+      </div>
+
+      <div class="footer-center">
+        <a href="https://www.instagram.com/lojaime" target="_blank" class="footer-instagram">
+          <img src="img/instagram-icon.png" alt="Instagram" />
+          <span>instagram</span>
+        </a>
+      </div>
+
+      <div class="footer-right">
+        <a href="/privacy-policy.html" class="footer-link">Privacy Policy</a>
+        <p class="footer-text">&copy; 2025 Lojaime. Të gjitha të drejtat e rezervuara.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

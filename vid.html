@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kidobot Video Grid</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4c61f;
+      padding: 20px;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .video-card {
+      background-color: white;
+      border: 3px solid red;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+
+    .video-card iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Responsive for mobile: 1 video per row */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-container">
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/x-axVEauPXo"
+            title="Video 1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/jbvdw4JKY0s?si=W8Znx8_z9XGPPJge"
+            title="Video 2"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/HENVx4Xg2P4?si=s40uMgFETy01BxSu"
+            title="Video 3"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/MgzZqUVZWQE?si=JPH6m7k1h-R8oYgH"
+            title="Video 4"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/2iIMtphRWU8?si=ssvyr0CPdOKKsUET"
+            title="Video 5"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/0QucdjKJ6xw?si=HfF6kUNIgW4xHQkz"
+            title="Video 6"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+
+  <div class="video-card">
+    <iframe src="https://www.youtube.com/embed/ZKvrI1OW80Q?si=EAaYRil92jFFsoct"
+            title="Video 7"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+</div>
+
+</body>
+</html>
